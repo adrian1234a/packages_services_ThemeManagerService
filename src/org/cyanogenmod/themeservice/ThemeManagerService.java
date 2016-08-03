@@ -374,7 +374,6 @@ public class ThemeManagerService extends Service {
 
         mPM = getPackageManager();
 
-        publishThemesTile();
         if (!isThemeApiUpToDate()) {
             Log.d(TAG, "The system has been upgraded to a theme new api, " +
                     "checking if currently set theme is compatible");
@@ -392,7 +391,6 @@ public class ThemeManagerService extends Service {
         unregisterReceiver(mWallpaperChangeReceiver);
         unregisterReceiver(mUserChangeReceiver);
         unregisterAppsFailureReceiver();
-        unpublishThemesTile();
 
         super.onDestroy();
     }
@@ -1251,29 +1249,6 @@ public class ThemeManagerService extends Service {
         return SYSTEM_DEFAULT;
     }
 
-    private void publishThemesTile() {
-        final int userId = UserHandle.myUserId();
-        final Context resourceContext = QSUtils.getQSTileContext(this, userId);
-
-        CMStatusBarManager statusBarManager = CMStatusBarManager.getInstance(this);
-        final PendingIntent chooserIntent = getThemeChooserPendingIntent();
-        CustomTile tile = new CustomTile.Builder(resourceContext)
-                .setLabel(R.string.qs_themes_label)
-                .setContentDescription(R.string.qs_themes_content_description)
-                .setIcon(R.drawable.ic_qs_themes)
-                .setOnClickIntent(chooserIntent)
-                .setOnLongClickIntent(chooserIntent)
-                .shouldCollapsePanel(true)
-                .build();
-        statusBarManager.publishTile(QSConstants.DYNAMIC_TILE_THEMES,
-                ThemeManagerService.class.hashCode(), tile);
-    }
-
-    private void unpublishThemesTile() {
-        CMStatusBarManager statusBarManager = CMStatusBarManager.getInstance(this);
-        statusBarManager.removeTile(QSConstants.DYNAMIC_TILE_THEMES,
-                ThemeManagerService.class.hashCode());
-    }
 
     private PendingIntent getThemeChooserPendingIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
